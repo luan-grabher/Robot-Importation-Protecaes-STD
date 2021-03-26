@@ -24,11 +24,14 @@ public class RobotImportationProtecaesSTD {
     public static void main(String[] args) {
         try {
             AppRobo robo = new AppRobo(nomeApp);
-            robo.definirParametros();
 
+                
             if (args.length > 0 && args[0].equals("test")) {
                 robo.definirParametros(testParameters);
+            } else {
+                robo.definirParametros();
             }
+            
 
             String iniPath = "\\\\heimerdinger\\docs\\Informatica\\Programas\\Moresco\\Robos\\Contabilidade\\TemplateImportacao\\";
             String iniName = robo.getParametro("ini");
@@ -147,7 +150,7 @@ public class RobotImportationProtecaesSTD {
             importationExtrato.setNome((String) extratoConfig.get("nome"));
             importationExtrato.getXlsxCols().putAll((Map<String, Map<String, String>>) extratoConfig.get("colunas"));
         }
-        
+
         Importation importationPgtosMensal = null;
         if (pgtosMensalConfig != null) {
             importationPgtosMensal = new Importation();

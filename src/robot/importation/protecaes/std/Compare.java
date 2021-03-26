@@ -58,7 +58,7 @@ public class Compare extends Executavel {
         header.append(td("<b>Doc</b>"));
         header.append(td("<b>Historicos</b>"));
         header.append(td("<b>filial</b>"));
-        header.append(td("<b>Vaslor</b>"));
+        header.append(td("<b>Valor</b>"));
         header.append(td("<b>E-S</b>"));
 
         rows.append(header);
