@@ -46,6 +46,10 @@ public class Compare extends Executavel {
      */
     private String tableDiference() {
         StringBuilder html = new StringBuilder();
+        
+        html.append(br());
+        html.append("Os seguintes lançamentos estão no Extrato e nos Pgtos Mensal e não estão no Contas a Pagar:");
+        html.append(br());
 
         StringBuilder rows = new StringBuilder();
         StringBuilder header = new StringBuilder();
