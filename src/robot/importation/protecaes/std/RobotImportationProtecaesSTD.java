@@ -25,13 +25,11 @@ public class RobotImportationProtecaesSTD {
         try {
             AppRobo robo = new AppRobo(nomeApp);
 
-                
             if (args.length > 0 && args[0].equals("test")) {
                 robo.definirParametros(testParameters);
             } else {
                 robo.definirParametros();
             }
-            
 
             String iniPath = "\\\\heimerdinger\\docs\\Informatica\\Programas\\Moresco\\Robos\\Contabilidade\\TemplateImportacao\\";
             String iniName = robo.getParametro("ini");
@@ -166,10 +164,8 @@ public class RobotImportationProtecaesSTD {
 
         Map<String, Executavel> execs = new LinkedHashMap<>();
         execs.put("Encontrar arquivo " + templateConfig.get("filtroArquivo"), controle.new defineArquivoNaImportacao((String) templateConfig.get("filtroArquivo"), importation));
-
-        if (extratoConfig != null) {
-            execs.put("Encontrar arquivo " + extratoConfig.get("filtroArquivo"), controle.new defineArquivoNaImportacao((String) extratoConfig.get("filtroArquivo"), importation));
-        }
+        execs.put("Encontrar arquivo " + extratoConfig.get("filtroArquivo"), controle.new defineArquivoNaImportacao((String) extratoConfig.get("filtroArquivo"), importationExtrato));
+        execs.put("Encontrar arquivo " + pgtosMensalConfig.get("filtroArquivo"), controle.new defineArquivoNaImportacao((String) pgtosMensalConfig.get("filtroArquivo"), importationPgtosMensal));
 
         execs.put("Criar template " + templateConfig.get("nome"), controle.new converterArquivoParaTemplate(importation, importationExtrato));
         execs.put("Tabela de diferenças", new Compare(importation, importationExtrato, importationPgtosMensal));
