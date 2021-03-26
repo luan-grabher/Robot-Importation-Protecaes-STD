@@ -52,13 +52,15 @@ public class RobotImportationProtecaesSTD {
             for (String template : templates) {
                 template = !template.equals("") ? " " + template : "";
 
-                String comparar = template + (template.equals("") ? "" : " ") + "Comparar";
+                String extrato = template + (template.equals("") ? "" : " ") + "Extrato";
+                String pgtosMensal = template + (template.equals("") ? "" : " ") + "Pgtos Mensal";
 
                 Map<String, Object> templateConfig = getTemplateConfig(template);
-                Map<String, Object> compararConfig = getTemplateConfig(comparar);
+                Map<String, Object> extratoConfig = getTemplateConfig(extrato);
+                Map<String, Object> pgtosMensalConfig = getTemplateConfig(pgtosMensal);
 
                 returnExecutions.append("\n").append(
-                        start(mes, ano, pastaEmpresa, pastaAnual, pastaMensal, templateConfig, compararConfig)
+                        start(mes, ano, pastaEmpresa, pastaAnual, pastaMensal, templateConfig, extratoConfig, pgtosMensalConfig)
                 );
             }
 
@@ -130,20 +132,29 @@ public class RobotImportationProtecaesSTD {
         return XLSX.getCollumnConfigFromString(collumnName, ini.get("Colunas" + template, collumnName));
     }
 
-    public static String start(int mes, int ano, String pastaEmpresa, String pastaAnual, String pastaMensal, Map<String, Object> templateConfig, Map<String, Object> compararConfig) {
+    public static String start(int mes, int ano, String pastaEmpresa, String pastaAnual, String pastaMensal, Map<String, Object> templateConfig, Map<String, Object> extratoConfig, Map<String, Object> pgtosMensalConfig) {
         Importation importation = new Importation();
         importation.setTIPO(templateConfig.get("tipo").equals("excel") ? Importation.TIPO_EXCEL : Importation.TIPO_OFX);
         importation.setIdTemplateConfig((String) templateConfig.get("id"));
         importation.setNome((String) templateConfig.get("nome"));
         importation.getXlsxCols().putAll((Map<String, Map<String, String>>) templateConfig.get("colunas"));
 
-        Importation importationC = null;
-        if (compararConfig != null) {
-            importationC = new Importation();
-            importationC.setTIPO(compararConfig.get("tipo").equals("excel") ? Importation.TIPO_EXCEL : Importation.TIPO_OFX);
-            importationC.setIdTemplateConfig((String) compararConfig.get("id"));
-            importationC.setNome((String) compararConfig.get("nome"));
-            importationC.getXlsxCols().putAll((Map<String, Map<String, String>>) compararConfig.get("colunas"));
+        Importation importationExtrato = null;
+        if (extratoConfig != null) {
+            importationExtrato = new Importation();
+            importationExtrato.setTIPO(extratoConfig.get("tipo").equals("excel") ? Importation.TIPO_EXCEL : Importation.TIPO_OFX);
+            importationExtrato.setIdTemplateConfig((String) extratoConfig.get("id"));
+            importationExtrato.setNome((String) extratoConfig.get("nome"));
+            importationExtrato.getXlsxCols().putAll((Map<String, Map<String, String>>) extratoConfig.get("colunas"));
+        }
+        
+        Importation importationPgtosMensal = null;
+        if (pgtosMensalConfig != null) {
+            importationPgtosMensal = new Importation();
+            importationPgtosMensal.setTIPO(pgtosMensalConfig.get("tipo").equals("excel") ? Importation.TIPO_EXCEL : Importation.TIPO_OFX);
+            importationPgtosMensal.setIdTemplateConfig((String) pgtosMensalConfig.get("id"));
+            importationPgtosMensal.setNome((String) pgtosMensalConfig.get("nome"));
+            importationPgtosMensal.getXlsxCols().putAll((Map<String, Map<String, String>>) pgtosMensalConfig.get("colunas"));
         }
 
         ControleTemplates controle = new ControleTemplates(mes, ano);
@@ -151,13 +162,14 @@ public class RobotImportationProtecaesSTD {
         controle.setPasta(pastaAnual, pastaMensal);
 
         Map<String, Executavel> execs = new LinkedHashMap<>();
-        execs.put("Procurando arquivo " + templateConfig.get("filtroArquivo"), controle.new defineArquivoNaImportacao((String) templateConfig.get("filtroArquivo"), importation));
+        execs.put("Encontrar arquivo " + templateConfig.get("filtroArquivo"), controle.new defineArquivoNaImportacao((String) templateConfig.get("filtroArquivo"), importation));
 
-        if (compararConfig != null) {
-            execs.put("Procurando arquivo " + compararConfig.get("filtroArquivo"), controle.new defineArquivoNaImportacao((String) compararConfig.get("filtroArquivo"), importation));
+        if (extratoConfig != null) {
+            execs.put("Encontrar arquivo " + extratoConfig.get("filtroArquivo"), controle.new defineArquivoNaImportacao((String) extratoConfig.get("filtroArquivo"), importation));
         }
 
-        execs.put("Criando template " + templateConfig.get("nome"), controle.new converterArquivoParaTemplate(importation, importationC));
+        execs.put("Criar template " + templateConfig.get("nome"), controle.new converterArquivoParaTemplate(importation, importationExtrato));
+        execs.put("Tabela de diferenças", new Compare(importation, importationExtrato, importationPgtosMensal));
 
         return AppRobo.rodarExecutaveis(nomeApp, execs);
     }
