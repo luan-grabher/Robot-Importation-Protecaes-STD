@@ -61,7 +61,7 @@ public class Compare extends Executavel {
         header.append(td("<b>Valor</b>"));
         header.append(td("<b>E-S</b>"));
 
-        rows.append(header);
+        rows.append(tr(header.toString()));
 
         //Percorre todos compareLctos
         compareLctos.forEach((c) -> {
@@ -69,14 +69,14 @@ public class Compare extends Executavel {
             if (!existsValue(contasPagar.getLctos(), c)) {
                 StringBuilder row = new StringBuilder();
 
-                row.append(tr(c.getData()));
-                row.append(tr(c.getDocumento()));
-                row.append(tr(c.getHistorico()));
-                row.append(tr(""));
-                row.append(tr(c.getValor().toPlainString()));
-                row.append(tr(c.getEntrada_Saida()));
+                row.append(td(c.getData()));
+                row.append(td(c.getDocumento()));
+                row.append(td(c.getHistorico()));
+                row.append(td(""));
+                row.append(td(c.getValor().toPlainString()));
+                row.append(td(c.getEntrada_Saida()));
 
-                rows.append(row);
+                rows.append(tr(row.toString()));
             }
         });
 
