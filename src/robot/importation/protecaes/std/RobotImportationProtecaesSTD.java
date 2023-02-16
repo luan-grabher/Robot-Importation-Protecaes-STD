@@ -31,48 +31,63 @@ public class RobotImportationProtecaesSTD {
                 robo.definirParametros();
             }
 
-            String iniPath = "\\\\heimerdinger\\docs\\Informatica\\Programas\\Moresco\\Robos\\Contabilidade\\TemplateImportacao\\";
-            String iniName = robo.getParametro("ini");
+            try{
+                String scriptIniFileName = "robot-aluita-importation.ini";
+                File scriptIniFile = FileManager.getFile(scriptIniFileName);
+                Ini scriptIni = new Ini(scriptIniFile);
 
-            ini = new Ini(FileManager.getFile(iniPath + iniName + ".ini"));
+                /* Pega os dados do arquivo ini */
+                String iniPath = scriptIni.fetch("folders", "templateConfig");
+                String iniName = robo.getParametro("ini");
 
-            String pastaEmpresa = ini.get("Pastas", "empresa");
-            String pastaAnual = ini.get("Pastas", "anual");
-            String pastaMensal = ini.get("Pastas", "mensal");
+                ini = new Ini(FileManager.getFile(iniPath + iniName + ".ini"));
 
-            int mes = Integer.valueOf(robo.getParametro("mes"));
-            mes = mes >= 1 && mes <= 12 ? mes : 1;
-            int ano = Integer.valueOf(robo.getParametro("ano"));
+                String pastaEmpresa = ini.get("Pastas", "empresa");
+                String pastaAnual = ini.get("Pastas", "anual");
+                String pastaMensal = ini.get("Pastas", "mensal");
 
-            nomeApp = "Importação " + pastaEmpresa + " - " + ini.get("Config", "nome") + " " + mes + "/" + ano;
+                int mes = Integer.valueOf(robo.getParametro("mes"));
+                mes = mes >= 1 && mes <= 12 ? mes : 1;
+                int ano = Integer.valueOf(robo.getParametro("ano"));
 
-            StringBuilder returnExecutions = new StringBuilder();
+                nomeApp = "Importação " + pastaEmpresa + " - " + ini.get("Config", "nome") + " " + mes + "/" + ano;
 
-            String[] templates = ini.get("Config", "templates").split(";");
-            //Para cada template pega as informações
-            for (String template : templates) {
-                template = !template.equals("") ? " " + template : "";
+                StringBuilder returnExecutions = new StringBuilder();
 
-                String extrato = template + (template.equals("") ? "" : " ") + "Extrato";
-                String pgtosMensal = template + (template.equals("") ? "" : " ") + "Pgtos Mensal";
+                String[] templates = ini.get("Config", "templates").split(";");
+                //Para cada template pega as informações
+                for (String template : templates) {
+                    template = !template.equals("") ? " " + template : "";
 
-                Map<String, Object> templateConfig = getTemplateConfig(template);
-                Map<String, Object> extratoConfig = getTemplateConfig(extrato);
-                Map<String, Object> pgtosMensalConfig = getTemplateConfig(pgtosMensal);
+                    String extrato = template + (template.equals("") ? "" : " ") + "Extrato";
+                    String pgtosMensal = template + (template.equals("") ? "" : " ") + "Pgtos Mensal";
 
-                returnExecutions.append("\n").append(
-                        start(mes, ano, pastaEmpresa, pastaAnual, pastaMensal, templateConfig, extratoConfig, pgtosMensalConfig)
-                );
+                    Map<String, Object> templateConfig = getTemplateConfig(template);
+                    Map<String, Object> extratoConfig = getTemplateConfig(extrato);
+                    Map<String, Object> pgtosMensalConfig = getTemplateConfig(pgtosMensal);
+
+                    returnExecutions.append("\n").append(
+                            start(mes, ano, pastaEmpresa, pastaAnual, pastaMensal, templateConfig, extratoConfig, pgtosMensalConfig)
+                    );
+                }
+
+                robo.setNome(nomeApp);
+                robo.executar(returnExecutions.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+                FileManager.save(new File(System.getProperty("user.home")) + "\\Desktop\\JavaError.txt",
+                        getStackTrace(e));
+                System.out.println("Ocorreu um erro na aplicação: " + e);
+
+                robo.executar("Ocorreu um erro na aplicação: " + e);
             }
-
-            robo.setNome(nomeApp);
-            robo.executar(returnExecutions.toString());
         } catch (Exception e) {
             e.printStackTrace();
             FileManager.save(new File(System.getProperty("user.home")) + "\\Desktop\\JavaError.txt", getStackTrace(e));
-            System.out.println("Ocorreu um erro na aplicação: " + e);
-            System.exit(0);
+            System.out.println("Ocorreu um erro na aplicação: " + e);            
         }
+
+        System.exit(0);
     }
 
     private static String getStackTrace(Exception e) {
